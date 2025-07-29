@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud Image Uploader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Enable class-based dark mode
+        tailwind.config = {
+          darkMode: 'class',
+        };
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen p-4 transition-colors duration-300">
+
+<div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">📤 Upload Data with Image</h1>
+        <button id="toggleTheme" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-3 py-1 rounded">
+            🌗 Toggle Theme
+        </button>
+    </div>
+
+    <form id="uploadForm" class="space-y-4">
+        <div>
+            <label class="block text-gray-700 dark:text-gray-200 font-medium">Data Name</label>
+            <input type="text" name="dataName" id="dataName" required class="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+        <div>
+            <label class="block text-gray-700 dark:text-gray-200 font-medium">Image</label>
+            <input type="file" name="image" id="image" accept="image/*" required class="mt-1 w-full text-black dark:text-white" />
+        </div>
+
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
+    </form>
+
+    <hr class="my-6 border-gray-300 dark:border-gray-600"/>
+
+    <div>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3">📚 All Data</h2>
+        <div id="dataList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('uploadForm');
+    const dataList = document.getElementById('dataList');
+    const toggleTheme = document.getElementById('toggleTheme');
+    const html = document.documentElement;
+
+    toggleTheme.addEventListener('click', () => {
+      html.classList.toggle('dark');
+    });
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const name = document.getElementById('dataName').value;
+      const image = document.getElementById('image').files[0];
+
+      const formData = new FormData();
+      const data = { dataName: name };
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+      formData.append('data', blob);
+      formData.append('image', image);
+
+      try {
+        const res = await fetch('https://cloudimage-production.up.railway.app/api/store', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          alert('✅ Upload successful!');
+          form.reset();
+          loadData();
+        } else {
+          alert('❌ Upload failed');
+        }
+      } catch (err) {
+        console.error('Upload error', err);
+        alert('❌ Error uploading image');
+      }
+    });
+
+    async function loadData() {
+      try {
+        const res = await fetch('https://cloudimage-production.up.railway.app/api/get');
+        const data = await res.json();
+        dataList.innerHTML = '';
+
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "border rounded p-3 shadow hover:shadow-lg bg-gray-100 dark:bg-gray-700";
+
+          div.innerHTML = `
+            <img src="${item.dataImage}" alt="Image" class="w-full h-48 object-cover rounded mb-2" />
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">${item.dataName}</h3>
+          `;
+
+          dataList.appendChild(div);
+        });
+      } catch (err) {
+        console.error('Failed to fetch data', err);
+        dataList.innerHTML = '<p class="text-red-500">Error loading data.</p>';
+      }
+    }
+
+    window.onload = loadData;
+</script>
+
+</body>
+</html>

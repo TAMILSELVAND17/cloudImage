@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: CloudImage
+  datasource:
+#    url: jdbc:mysql://localhost:3306/cloudimage?createDatabaseIfNotExist=true
+#    username: root
+#    password: root
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+     url: jdbc:mysql://gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/test?createDatabaseIfNotExist=true&sslMode=VERIFY_IDENTITY
+     username: 4EumS43TXVGNDmQ.root
+     password: ckpJhU60mZ1RCMcp
+     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+cloudinary:
+  cloud-name: dgxk7ot2e
+  api-key: 169538859451858
+  api-secret: wI7KExyW6GBPnlCAqd-xzyoNFrc
+
+server:
+  port: 8089
+#logging:
+#  level:
+#    org.springframework: DEBUG
+#    org.hibernate: DEBUG
+#    com.zaxxer.hikari: DEBUG
